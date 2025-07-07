@@ -1,5 +1,6 @@
 // src/components/Contact.jsx
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +18,18 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Form submission logic would go here
+    axios.post("http://localhost:5000/api/contact", formData)
+  .then((res) => {
+    alert("Thank you! We'll contact you soon.");
+    setFormData({
+      name: '', email: '', phone: '', businessType: '', message: ''
+    });
+  })
+  .catch((err) => {
+    console.error(err);
+    alert("Something went wrong.");
+  });
+
     alert('Thank you for your inquiry! We will contact you shortly.');
     setFormData({
       name: '',

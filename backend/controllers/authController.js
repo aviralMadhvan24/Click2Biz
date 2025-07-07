@@ -4,13 +4,18 @@ import jwt from 'jsonwebtoken';
 
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password ,role} = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    const newUser = await User.create({ name, email, password: hashedPassword , role : role  || 'client' });
 
 
-    const token = jwt.sign({id: newUser._id},process.env.JWT_SECRET,{expiresIn: "1d"});
+    const token = jwt.sign(
+  { id: newUser._id, role: newUser.role },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
 
 
 
@@ -18,7 +23,8 @@ export const register = async (req, res) => {
       message: 'User Registered',
       token,          
       name: newUser.name, 
-      email: newUser.email
+      email: newUser.email,
+      role : newUser.role
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -34,12 +40,26 @@ export const login = async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ message: 'Logged in successfully', token,name:user.name, email:user.email });
+    // Include role in token payload ✅
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      message: 'Logged in successfully',
+      token,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 export const logout = (req, res) => {
   

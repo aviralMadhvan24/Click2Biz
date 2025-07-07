@@ -35,7 +35,14 @@ export default function Login() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("name", res.data.name);
       localStorage.setItem("email", res.data.email);
-      navigate("/dashboard");
+      localStorage.setItem("role", res.data.role);
+
+      if(res.data.role === "admin"){
+        navigate("/admin-dashboard")
+      }else{
+        navigate('/client-dashboard')
+      }
+     
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {

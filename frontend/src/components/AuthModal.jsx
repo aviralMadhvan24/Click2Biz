@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { FiX, FiUser, FiLock, FiMail } from 'react-icons/fi';
 import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ onClose, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,13 +10,14 @@ const AuthModal = ({ onClose, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [role,setRole] = useState("client");
   const [error, setError] = useState('');
-
+ const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+   
     const endpoint = isLogin 
       ? 'http://localhost:5000/api/auth/login' 
       : 'http://localhost:5000/api/auth/register';
@@ -23,7 +25,7 @@ const AuthModal = ({ onClose, onLogin }) => {
     try {
       const payload = isLogin 
         ? { email, password }
-        : { name, email, password };
+        : { name, email, password ,role };
       
       const res = await axios.post(endpoint, payload);
       
@@ -31,9 +33,15 @@ const AuthModal = ({ onClose, onLogin }) => {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('name', res.data.name);
       localStorage.setItem('email', res.data.email);
+      localStorage.setItem('role', res.data.role);
       
       // Notify parent component about successful login
-      onLogin({ name: res.data.name, email: res.data.email });
+      onLogin({ name: res.data.name, email: res.data.email,role : res.data.role });
+   if (res.data.role === 'admin') {
+  navigate('/admin-dashboard');
+} else {
+  navigate('/client-dashboard');
+}
       
     } catch (err) {
       setError(err.response?.data?.message || 
@@ -96,6 +104,22 @@ const AuthModal = ({ onClose, onLogin }) => {
                 </div>
               </div>
             )}
+            {!isLogin && (
+  <div className="space-y-2">
+    <label className="block text-gray-300 mb-2">Account Type</label>
+    <select
+      value={role}
+      onChange={(e) => setRole(e.target.value)}
+      className="w-full p-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-indigo-500"
+      disabled={isLoading}
+      required
+    >
+      <option value="client">Client</option>
+      <option value="admin">Admin</option>
+    </select>
+  </div>
+)}
+
             
             <div className="space-y-2">
               <label className="block text-gray-300 mb-2">Email Address</label>

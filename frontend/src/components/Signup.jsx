@@ -21,6 +21,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [role ,setRole] = useState("client");
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -33,6 +34,7 @@ export default function Signup() {
         name,
         email,
         password,
+        role,
       });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("name", res.data.name);
@@ -90,6 +92,19 @@ export default function Signup() {
                 disabled={isLoading}
               />
             </div>
+<div className="space-y-2">
+  <Label className="text-gray-300">Account Type</Label>
+  <select
+    value={role}
+    onChange={(e) => setRole(e.target.value)}
+    required
+    className="w-full p-2 bg-gray-700 border border-gray-600 text-white rounded focus:ring-2 focus:ring-indigo-500/50"
+    disabled={isLoading}
+  >
+    <option value="client">Client</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
 
             <div className="space-y-2">
               <Label className="text-gray-300">Password</Label>

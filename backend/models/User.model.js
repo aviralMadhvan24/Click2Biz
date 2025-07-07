@@ -1,9 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import mainConnection from "../db/mainConnection.js";
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
+  name: String,
+  email: String,
+  password: String,
+  role: { type: String, enum: ['client', 'admin'], default: 'client' },
+  createdAt: { type: Date, default: Date.now },
+}, { collection: "Users" });
 
-export default mongoose.model('User', userSchema);
+export default mainConnection.model("User", userSchema);
