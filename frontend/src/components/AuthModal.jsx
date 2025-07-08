@@ -1,9 +1,8 @@
-// src/components/AuthModal.jsx
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { FiX, FiUser, FiLock, FiMail } from 'react-icons/fi';
 import axios from 'axios';
 import { Navigate, useNavigate } from 'react-router-dom';
-
 const AuthModal = ({ onClose, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
@@ -51,11 +50,19 @@ const AuthModal = ({ onClose, onLogin }) => {
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div 
-        className="bg-gray-800 rounded-xl w-full max-w-md overflow-hidden border border-gray-700 shadow-xl"
+   return (
+    <motion.div 
+      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div 
+        className="bg-gray-900 rounded-xl w-full max-w-md overflow-hidden border border-gray-800 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", damping: 25 }}
       >
         <div className="relative">
           <button 
@@ -65,7 +72,7 @@ const AuthModal = ({ onClose, onLogin }) => {
             <FiX size={24} />
           </button>
           
-          <div className="bg-indigo-700 p-6">
+          <div className="bg-gradient-to-r from-indigo-700 to-purple-700 p-6">
             <h2 className="text-2xl font-bold text-white text-center">
               {isLogin ? 'Login to Your Account' : 'Create an Account'}
             </h2>
@@ -87,22 +94,22 @@ const AuthModal = ({ onClose, onLogin }) => {
 
             {!isLogin && (
               <div className="space-y-2">
-                <label className="block text-gray-300 mb-2">Full Name</label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    <FiUser />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
-                    required={!isLogin}
-                    disabled={isLoading}
-                  />
+              <label className="block text-gray-300 mb-2">Full Name</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <FiUser />
                 </div>
+                <input
+                  type="text"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                  required={!isLogin}
+                  disabled={isLoading}
+                />
               </div>
+            </div>
             )}
             {!isLogin && (
   <div className="space-y-2">
@@ -196,9 +203,9 @@ const AuthModal = ({ onClose, onLogin }) => {
               </button>
             </p>
           </div>
-        </div>
-      </div>
-    </div>
+         </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -1,8 +1,14 @@
-// src/components/Footer.jsx
 import React from 'react';
-import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin } from 'react-icons/fi';
-
+import { motion } from 'framer-motion';
+import { fadeIn } from '../utils/motion';
+import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin, FiArrowUp } from 'react-icons/fi';
 const Footer = () => {
+  const scrollToTop = () => {
+  window.scrollTo({ 
+    top: 0, 
+    behavior: 'smooth' 
+  });
+};
   const currentYear = new Date().getFullYear();
   
   const links = [
@@ -22,7 +28,9 @@ const Footer = () => {
   ];
 
   return (
-    <footer id="footer" className="bg-[#312E81] text-white pt-16 pb-8">
+      <footer id="footer" className="bg-gray-900 text-white pt-16 pb-8 relative">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-purple-600"></div>
+      
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
@@ -79,14 +87,25 @@ const Footer = () => {
               <p>+91 98765 43210</p>
             </address>
           </div>
-        </div>
+         </div>
         
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
           <p>&copy; {currentYear} Click2Biz. All rights reserved.</p>
         </div>
       </div>
+      
+      <motion.button
+        onClick={scrollToTop}
+        className="fixed bottom-8 right-8 bg-gradient-to-br from-indigo-600 to-purple-600 text-white p-3 rounded-full shadow-lg z-50"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <FiArrowUp size={24} />
+      </motion.button>
     </footer>
   );
 };
+
+
 
 export default Footer;

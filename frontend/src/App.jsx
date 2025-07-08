@@ -17,7 +17,7 @@ import AuthModal from './components/AuthModal';
 
 import AdminDashboard from './components/Admin-dashboard';
 
-// Enhanced PrivateRoute with role support
+
 function PrivateRoute({ children, requiredRole }) {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');

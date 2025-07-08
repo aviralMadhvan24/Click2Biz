@@ -1,5 +1,5 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiUser, FiLogOut } from 'react-icons/fi';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -41,12 +41,17 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
   ];
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
+    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-gray-900 shadow-md py-2' : 'bg-transparent py-4'}`}>
       <div className="container mx-auto px-4 sm:px-6">
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-3">
-            <div className="bg-[#312E81] w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl">C2B</div>
-            <span className={`text-xl font-bold ${scrolled ? 'text-gray-800' : 'text-white'}`}>Click2Biz</span>
+            <motion.div 
+              className="bg-gradient-to-br from-indigo-600 to-purple-600 w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl"
+              whileHover={{ rotate: 10 }}
+            >
+              C2B
+            </motion.div>
+            <span className="text-xl font-bold text-white">Click2Biz</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -56,7 +61,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  scrolled ? 'text-gray-700 hover:bg-gray-100 hover:text-[#FF6B00]' : 'text-white hover:bg-white/10'
+                  scrolled ? 'text-gray-50 hover:bg-gray-100 hover:text-[#FF6B00]' : 'text-white hover:bg-white/10'
                 }`}
               >
                 {link.name}
@@ -130,7 +135,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
 
           {/* Mobile Menu Button */}
           <button
-            className={`md:hidden p-2 rounded-md ${scrolled ? 'text-gray-800' : 'text-white'} hover:bg-white/10`}
+            className="md:hidden p-2 rounded-md text-white hover:bg-indigo-900/30 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
@@ -139,9 +144,16 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white shadow-lg absolute top-full left-0 right-0 animate-fadeIn">
-          <div className="container mx-auto px-4 py-3">
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            className="md:hidden bg-gray-900 shadow-lg absolute top-full left-0 right-0"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="container mx-auto px-4 py-3">
             {navLinks.map((link) => (
               <button
                 key={link.id}
@@ -194,9 +206,11 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 </div>
               )}
             </div>
-          </div>
+       
         </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };
