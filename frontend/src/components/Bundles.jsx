@@ -1,8 +1,19 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../utils/motion';
-
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 const Bundles = ({title}) => {
+ const { user } = useAuth();
+
+    const navigate = useNavigate();
+    const handleBookNowClick = () => {
+    if (user?.role === 'client') {
+      navigate('/client-dashboard');
+    } else {
+    return  window.alert("Oops! You need to log in before booking a bundle. Please log in and try again.");
+    }
+  };
   const digitalEssentials = [
     {
       id: 'de1',
@@ -150,14 +161,14 @@ const Bundles = ({title}) => {
                 ))}
               </ul>
               
-              <motion.button 
-                onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold hover:opacity-90 transition-opacity"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {title === 'Maintenance' ? 'Subscribe Now' : 'Book Now'}
-              </motion.button>
+             <motion.button 
+  onClick={handleBookNowClick}
+  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold hover:opacity-90 transition-opacity"
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+>
+  {title === 'Maintenance' ? 'Subscribe Now' : 'Book Now'}
+</motion.button>
             </motion.div>
           ))}
         </div>

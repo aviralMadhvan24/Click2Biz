@@ -5,22 +5,25 @@ import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../utils/motion';
 const Testimonials = () => {
   const testimonials = [
-    {
-      name: "Rajesh Mehta",
-      role: "Restaurant Owner",
-      quote: "Our online orders increased by 40% after Click2Biz built our website. Their team delivered in just 5 days!"
-    },
-    {
-      name: "Priya Sharma",
-      role: "Boutique Owner",
-      quote: "The social media campaigns brought so many new customers to our store. Highly recommended for small businesses!"
-    },
-    {
-      name: "Vikram Patel",
-      role: "Auto Repair Shop",
-      quote: "Professional website at an unbelievable price. The support team helped me update content myself after delivery."
-    }
-  ];
+
+  {
+    name: "Priya Sharma",
+    role: "Boutique Owner",
+    quote: "Their social media campaigns brought so many new customers to my store. I've seen a noticeable boost in foot traffic."
+  },
+  {
+    name: "Kunal Verma",
+    role: "Gym Owner",
+    quote: "Click2Biz built us a stunning website with online membership sign-ups. Our new digital presence has made a huge difference."
+  },
+  {
+    name: "Simran Kaur",
+    role: "Bakery Owner",
+    quote: "From beautiful product posters to our Google profile setup, everything was handled smoothly. Highly recommend their services."
+  },
+
+];
+
 
    return (
     <section id="testimonials" className="py-20 bg-gradient-to-br from-indigo-900 to-purple-900">
@@ -47,7 +50,10 @@ const Testimonials = () => {
               whileHover={{ scale: 1.03 }}
             >
               <div className="flex items-center mb-6">
-                <div className="bg-gradient-to-br from-indigo-400 to-purple-500 w-16 h-16 rounded-full" />
+                
+                <div className="bg-gradient-to-br from-indigo-400 to-purple-500 w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold">
+  {testimonial.name.charAt(0)}
+</div>
                 <div className="ml-4">
                   <h3 className="font-bold text-xl text-white">{testimonial.name}</h3>
                   <p className="text-indigo-300">{testimonial.role}</p>

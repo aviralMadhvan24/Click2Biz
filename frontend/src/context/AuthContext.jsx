@@ -1,13 +1,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const decodeJWT = (token) => {
   if (!token) return null;
-  
+
   try {
     const base64Url = token.split('.')[1];
     if (!base64Url) return null;
-    
+
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
     setToken('');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('paymentStatus'); // clear payment too if needed
     navigate('/login');
   }, [navigate]);
 
@@ -43,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Invalid login parameters');
       return;
     }
-    
+
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('token', authToken);
@@ -51,27 +53,19 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeAuth = () => {
       try {
         const storedToken = localStorage.getItem('token');
-        const storedUser = JSON.parse(localStorage.getItem('user') || null);
-        
-        if (!storedToken || !storedUser) {
-          setIsLoading(false);
-          return;
-        }
+        const storedUser = JSON.parse(localStorage.getItem('user'));
 
-        const decoded = decodeJWT(storedToken);
-        
-        if (!decoded) {
-          throw new Error('Invalid token format');
-        }
-
-        if (decoded.exp * 1000 > Date.now()) {
-          setToken(storedToken);
-          setUser(storedUser);
-        } else {
-          throw new Error('Token expired');
+        if (storedToken && storedUser) {
+          const decoded = decodeJWT(storedToken);
+          if (decoded && decoded.exp * 1000 > Date.now()) {
+            setToken(storedToken);
+            setUser(storedUser);
+          } else {
+            logout();
+          }
         }
       } catch (error) {
         console.error('Auth initialization error:', error.message);
@@ -84,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, [logout]);
 
-  // Optional: Add a useEffect to handle token expiration while the app is running
+  // Active expiry checker (optional)
   useEffect(() => {
     if (!token) return;
 
@@ -92,11 +86,10 @@ export const AuthProvider = ({ children }) => {
       const decoded = decodeJWT(token);
       if (decoded && decoded.exp * 1000 < Date.now()) {
         logout();
-        toast.error('Your session has expired. Please log in again.');
+        toast.error('Your session expired. Please log in again.');
       }
     };
 
-    // Check every minute
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [token, logout]);
@@ -110,11 +103,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user && !!token,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

@@ -30,9 +30,36 @@ const AdminDashboard = () => {
     fetchAll();
   }, []);
 
+  const updateServiceStatus = async (purchaseId, serviceIndex, newStatus) => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases/services/${purchaseId}/${serviceIndex}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+
+    // Update purchases state locally
+    setPurchases(purchases.map(p => 
+      p._id === purchaseId ? data.updatedPurchase : p
+    ));
+
+    toast.success(`Service status updated to ${newStatus}`);
+  } catch (err) {
+    console.error(err);
+    toast.error('Failed to update service status');
+  }
+};
+
+
   const updatePurchaseStatus = async (id, status) => {
     try {
-      const response = await fetch(`/api/purchases/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -45,7 +72,6 @@ const AdminDashboard = () => {
         throw new Error('Failed to update status');
       }
 
-      // Update local state
       setPurchases(purchases.map(p =>
         p._id === id ? { ...p, status } : p
       ));
@@ -57,10 +83,8 @@ const AdminDashboard = () => {
     }
   };
 
-  // Only completed purchases for metrics and table
   const completedPurchases = purchases.filter(p => p.status === 'completed');
 
-  // Metrics
   const totalRevenue = completedPurchases.reduce((sum, p) => sum + p.total, 0);
   const totalClients = [...new Set(completedPurchases.map(p => p.clientEmail))].length;
   const totalOrders = completedPurchases.length;
@@ -79,46 +103,21 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {/* Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gray-800 p-6 rounded-lg">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-gray-400">Total Revenue</p>
-                <p className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</p>
-              </div>
-              <div className="bg-indigo-600 p-3 rounded-full">
-                <FiDollarSign className="text-white text-2xl" />
-              </div>
-            </div>
+            <p className="text-gray-400">Total Revenue</p>
+            <p className="text-3xl font-bold">₹{totalRevenue.toLocaleString()}</p>
           </div>
-
           <div className="bg-gray-800 p-6 rounded-lg">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-gray-400">Total Clients</p>
-                <p className="text-3xl font-bold">{totalClients}</p>
-              </div>
-              <div className="bg-green-600 p-3 rounded-full">
-                <FiUsers className="text-white text-2xl" />
-              </div>
-            </div>
+            <p className="text-gray-400">Total Clients</p>
+            <p className="text-3xl font-bold">{totalClients}</p>
           </div>
-
           <div className="bg-gray-800 p-6 rounded-lg">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-gray-400">Total Orders</p>
-                <p className="text-3xl font-bold">{totalOrders}</p>
-              </div>
-              <div className="bg-blue-600 p-3 rounded-full">
-                <FiPackage className="text-white text-2xl" />
-              </div>
-            </div>
+            <p className="text-gray-400">Total Orders</p>
+            <p className="text-3xl font-bold">{totalOrders}</p>
           </div>
         </div>
 
-        {/* Purchases Table */}
         <div className="bg-gray-800 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-4">Successful Purchases</h2>
 
@@ -134,9 +133,9 @@ const AdminDashboard = () => {
                     <th className="py-3 px-4 text-left">Client</th>
                     <th className="py-3 px-4 text-left">Email</th>
                     <th className="py-3 px-4 text-left">Items</th>
+                    <th className="py-3 px-4 text-left">Services</th>
                     <th className="py-3 px-4 text-left">Amount</th>
                     <th className="py-3 px-4 text-left">Status</th>
-                    <th className="py-3 px-4 text-left">Actions</th>
                     <th className="py-3 px-4 text-left">Date</th>
                   </tr>
                 </thead>
@@ -147,34 +146,59 @@ const AdminDashboard = () => {
                       <td className="py-3 px-4">{purchase.clientEmail}</td>
                       <td className="py-3 px-4">
                         <ul className="list-disc list-inside">
-                          {purchase.items.map((item, index) => (
-                            <li key={index}>{item.name} (₹{item.price})</li>
+                          {purchase.items.map((item, i) => (
+                            <li key={i}>{item.name} (₹{item.price})</li>
                           ))}
                         </ul>
+                      </td>
+                      <td className="py-3 px-4">
+                        <ul className="list-disc list-inside mb-2">
+                         {purchase.services.map((s, i) => (
+  <li key={i} className="flex items-center justify-between">
+    <span>
+      {s.name} — 
+      <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${
+        s.status === 'done' ? 'bg-green-500/20 text-green-400'
+        : 'bg-yellow-500/20 text-yellow-400'
+      }`}>
+        {s.status.toUpperCase()}
+      </span>
+    </span>
+    <div className="ml-2">
+      {s.status !== 'done' && (
+     <button
+  onClick={() => {
+    const confirmMark = window.confirm("Are you sure you want to mark this service as done?");
+    if (confirmMark) {
+      updateServiceStatus(purchase._id, i, 'done');
+    }
+  }}
+  className="text-green-400 text-xs bg-green-500/10 px-2 py-0.5 rounded hover:bg-green-600/20 transition"
+>
+  Mark Done
+</button>
+      )}
+    </div>
+  </li>
+))}
+
+                        </ul>
+                        <div className="mt-2 bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="bg-indigo-500 h-full transition-all duration-500"
+                            style={{
+                              width: `${Math.round(
+                                (purchase.services.filter(s => s.status === 'done').length / purchase.services.length) * 100
+                              )}%`
+                            }}
+                          />
+                        </div>
                       </td>
                       <td className="py-3 px-4 font-bold">₹{purchase.total}</td>
                       <td className="py-3 px-4">
                         <span className="px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-400">
                           {purchase.status}
                         </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => updatePurchaseStatus(purchase._id, 'cancelled')}
-                            className="p-1.5 bg-red-500/20 rounded hover:bg-red-500/30"
-                            title="Cancel Order"
-                          >
-                            <FiX className="text-red-400" />
-                          </button>
-                          <button
-                            onClick={() => updatePurchaseStatus(purchase._id, 'pending')}
-                            className="p-1.5 bg-yellow-500/20 rounded hover:bg-yellow-500/30"
-                            title="Mark as Pending"
-                          >
-                            <FiClock className="text-yellow-400" />
-                          </button>
-                        </div>
                       </td>
                       <td className="py-3 px-4">
                         {new Date(purchase.date).toLocaleDateString()}

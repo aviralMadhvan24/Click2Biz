@@ -1,2 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* In your global CSS file (index.css or App.css) */
+html, body {
+  width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+* {
+  box-sizing: border-box; /* Ensures padding doesn't add to total width */
+}
+

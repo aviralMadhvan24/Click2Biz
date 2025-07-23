@@ -42,19 +42,39 @@ export const isClient = (req, res, next) => {
 
 
 
+
 export const protect = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({ message: 'Not authorized' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    console.log("Decoded user:", decoded);
+
+    // 🔴 THIS IS THE MISSING PART
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+
+    req.user = user; 
+    
+    console.log("Authenticated user:", req.user._id);
+
+    req.user = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    };
+
     next();
   } catch (error) {
     console.error('Token verification error:', error);
     res.status(401).json({ message: 'Not authorized, token failed' });
   }
-}
+};

@@ -22,7 +22,7 @@ const Contact = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post("http://localhost:5000/api/contact", formData)
+    axios.post("https://click2biz-backend.onrender.com/api/contact", formData)
   .then((res) => {
     alert("Thank you! We'll contact you soon.");
     setFormData({
@@ -141,10 +141,10 @@ const Contact = () => {
                     name="businessType"
                     value={formData.businessType}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">Select your business</option>
+                    <option  value="">Select your business</option>
                     <option value="restaurant">Restaurant/Cafe</option>
                     <option value="retail">Retail Shop</option>
                     <option value="service">Service Provider</option>

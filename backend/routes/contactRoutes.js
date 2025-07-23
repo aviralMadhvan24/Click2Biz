@@ -1,6 +1,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
-import mongoose from "mongoose";
+
 import Contact from "../models/Contact.model.js";
 
 const router = express.Router();

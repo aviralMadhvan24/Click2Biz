@@ -1,3 +1,6 @@
+// ✅ SOLUTION: include clientName and clientEmail inside Purchase schema again
+// and make sure they are populated from req.user on server side
+
 import mongoose from "mongoose";
 
 const purchaseSchema = new mongoose.Schema({
@@ -17,7 +20,7 @@ const purchaseSchema = new mongoose.Schema({
   items: [{
     bundleId: String,
     name: String,
-     price: Number, 
+    price: Number,
     category: String
   }],
   total: Number,
@@ -29,7 +32,12 @@ const purchaseSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now
-  }
+  },services: [{
+    name:       String,           // e.g. "GMB Setup"
+    bundleType: String,           // e.g. "Digital Kickstart"
+    status:     { type: String, enum: ["todo","done"], default: "todo" },
+    doneAt:     Date
+  }]
 }, { collection: "Purchases" });
 
 export default mongoose.model("Purchase", purchaseSchema);

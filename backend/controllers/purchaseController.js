@@ -13,12 +13,20 @@ export const createPurchase = async (req, res) => {
       return res.status(400).json({ error: "Valid total amount is required" });
     }
 
+    // create services array dynamically
+    const services = items.map(item => ({
+      name: `${item.name} Service`,
+      bundleType: item.category,
+      status: "todo"
+    }));
+
     const newPurchase = await Purchase.create({
       clientId,
       clientName,
       clientEmail,
       items,
       total,
+      services,
       status: "pending"
     });
 
@@ -31,6 +39,7 @@ export const createPurchase = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 export const getPurchases = async (req, res) => {
   try {
@@ -74,4 +83,21 @@ export const updatePurchaseStatus = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
   }
+};
+
+
+
+
+
+export const updateServiceStatus = async (req, res) => {
+  const { purchaseId, serviceIndex } = req.params;
+  const { status } = req.body;
+
+  const purchase = await Purchase.findById(purchaseId);
+  if (!purchase) return res.status(404).json({ error: 'Purchase not found' });
+
+  purchase.services[serviceIndex].status = status;
+  await purchase.save();
+
+  res.json({ success: true, updatedPurchase: purchase });
 };

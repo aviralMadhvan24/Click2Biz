@@ -3,6 +3,7 @@ import express from 'express';
 import { protect, isAdmin } from '../middlewares/auth.js';
 import { register, login, logout, verifyPassword } from '../controllers/authController.js';
 import { inviteRegister, generateInvite } from '../controllers/inviteController.js';
+import { forgotPassword, resetPassword } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -16,5 +17,8 @@ router.post('/invite-register', inviteRegister);
 
 // only existing admins can generate new invites
 router.post('/generate-invite', protect, isAdmin, generateInvite);
+
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 export default router;

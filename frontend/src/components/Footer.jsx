@@ -22,8 +22,8 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: <FiFacebook />, href: "#" },
-    { icon: <FiInstagram />, href: "#" },
-    { icon: <FiTwitter />, href: "#" },
+    { icon: <FiInstagram />, href: "https://www.instagram.com/click2biz/?next=%2F&hl=en" },
+    { icon: <FiTwitter />, href: "https://x.com/Click2Biz" },
     { icon: <FiLinkedin />, href: "#" }
   ];
 
@@ -36,7 +36,7 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-bold mb-6">Click2Biz</h3>
             <p className="text-gray-400 mb-6">
-              Fast, affordable digital solutions for local businesses. Established 2023.
+              Fast, affordable digital solutions for local businesses. Established 2025.
             </p>
             <div className="flex space-x-4">
               {socialLinks.map((link, index) => (
@@ -81,10 +81,10 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-6">Contact</h4>
             <address className="text-gray-400 not-italic">
-              <p className="mb-3">123 Business Avenue</p>
-              <p className="mb-3">Mumbai, India 400001</p>
-              <p className="mb-3">hello@click2biz.com</p>
-              <p>+91 98765 43210</p>
+              
+              <p className="mb-3">Location: Ghaziabad, Uttar Pradesh, India</p>
+              <p className="mb-3">contact@click2biz.com</p>
+              <p>+91 74528 77151</p>
             </address>
           </div>
          </div>

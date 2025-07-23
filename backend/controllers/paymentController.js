@@ -43,6 +43,8 @@ export const createRazorpayOrder = async (req, res) => {
 };
 
 // Verify Payment
+import { sendMail } from '../utils/mailer.js'; // your mail util
+
 export const verifyPayment = async (req, res) => {
   try {
     const {
@@ -51,8 +53,7 @@ export const verifyPayment = async (req, res) => {
       razorpay_signature,
       paymentId
     } = req.body;
-    
-    // 1) Verify signature
+
     const generated_signature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -62,7 +63,6 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid signature' });
     }
 
-    // 2) Update Payment doc
     const payment = await Payment.findByIdAndUpdate(
       paymentId,
       {
@@ -78,18 +78,33 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Payment record not found' });
     }
 
-    // 3) Mark the associated Purchase as completed
+    // Mark purchase completed
     const purchaseRef = payment.purchase;
     const purchaseId = purchaseRef._id || purchaseRef;
+
     await Purchase.findByIdAndUpdate(purchaseId, { status: 'completed' });
 
-    // 4) Respond back
+    // 🎉 Send payment success email to client
+    await sendMail({
+      to: purchaseRef.clientEmail,
+      subject: `Payment Successful — Click2Biz`,
+      html: `
+        <h3>Hi ${purchaseRef.clientName},</h3>
+        <p>Your payment of ₹${(payment.amount/100).toLocaleString()} for your selected service bundle has been received successfully.</p>
+        <p>We’ve started working on your services — you can track the progress from your <a href="https://click2biz.in/client-dashboard">dashboard</a>.</p>
+        <br/>
+        <p>Thank you for choosing Click2Biz 🚀</p>
+      `
+    });
+
     res.json({ success: true, payment });
+
   } catch (error) {
     console.error('Payment verification error:', error);
     res.status(500).json({ error: 'Payment verification failed' });
   }
 };
+
 
 // Get Payment Details
 export const getPaymentDetails = async (req, res) => {

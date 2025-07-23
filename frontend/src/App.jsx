@@ -18,6 +18,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ClientDashboard from './components/pages/ClientDasboard.jsx';
 import AdminDashboard from './components/pages/AdminDashboard.jsx';
 import AdminInvites from './components/pages/AdminInvites';
+import Team from './components/Team';
+import AddOns from './components/AddOns';
 
 function PrivateRoute({ children, requiredRole }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -78,16 +80,18 @@ function AppContent() {
             path="/"
             element={
               <div className="font-sans">
-                <Hero />
+               <Hero onLoginClick={() => setShowLoginModal(true)} />
                 <Services />
                 <Bundles title="Digital" />
                 <hr />
                 <Bundles title="Social Media" />
                 <hr />
                 <Bundles title="Maintenance" />
+                <AddOns/>
                 <Portfolio />
                 <Testimonials />
                 <WhyChooseUs />
+                <Team/>
                 <Contact />
                 <AboutUs />
               </div>

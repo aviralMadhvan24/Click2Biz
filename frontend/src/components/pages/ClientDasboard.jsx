@@ -8,25 +8,156 @@ import {
   FiCheckCircle, 
   FiCreditCard,
   FiXCircle, 
-  FiClock 
+  FiClock ,
+  FiPlusCircle,
+  FiPaperclip
 } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Layout from '../Layout';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+const SupportRequestModal = ({ isOpen, onClose, purchaseId }) => {
+  const [message, setMessage] = useState('');
+  const [attachments, setAttachments] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(files);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append('purchaseId', purchaseId);
+      formData.append('message', message);
+      
+      attachments.forEach(file => {
+        formData.append('attachments', file);
+      });
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/support`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit support request');
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+        setSuccess(false);
+        setMessage('');
+        setAttachments([]);
+      }, 2000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <motion.div 
+        className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 w-full max-w-md border border-gray-700 shadow-2xl"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-white">Request Support</h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            <FiXCircle size={24} />
+          </button>
+        </div>
+
+        {success ? (
+          <div className="text-center py-8">
+            <FiCheckCircle className="mx-auto text-5xl text-green-500 mb-4" />
+            <h4 className="text-xl font-bold text-white mb-2">Request Submitted!</h4>
+            <p className="text-gray-400">Our team will contact you shortly.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-300 mb-2">Describe your issue</label>
+              <textarea
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                rows={5}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                required
+                placeholder="Please describe your support request in detail..."
+              />
+            </div>
+
+            {error && (
+              <div className="mb-4 text-red-500 text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting...
+                  </>
+                ) : 'Submit Request'}
+              </button>
+            </div>
+          </form>
+        )}
+      </motion.div>
+    </div>
+  );
+};
 
 const ClientDashboard = () => {
 
- 
-  const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
+ const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
   const [sdkReady, setSdkReady] = useState(false);
   const [activeTab, setActiveTab] = useState('bundles');
   const [purchasedBundles, setPurchasedBundles] = useState([]);
   const [cart, setCart] = useState([]);
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const { user, token, isLoading } = useAuth();
+  const { token  } = useAuth();
+  const [supportModalOpen, setSupportModalOpen] = useState(false); // Add this line
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState(null); // Add this line
   const navigate = useNavigate();
 useEffect(() => {
   // If the script tag is in index.html, it'll be loaded before this runs
@@ -140,7 +271,7 @@ useEffect(() => {
   useEffect(() => {
     const fetchPurchasedBundles = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/purchases', {
+       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -162,6 +293,85 @@ useEffect(() => {
     
     fetchPurchasedBundles();
   }, []);
+  const addOns = [
+  {
+    id: 'ao1',
+    name: "WhatsApp Widget Installation",
+    description: "Click-to-chat button on your website for instant leads",
+    price: 299,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao2',
+    name: "WhatsApp Catalogue Setup",
+    description: "Product/service showcase inside your WhatsApp Business app",
+    price: 699,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao3',
+    name: "WhatsApp API Setup",
+    description: "Official API integration for auto messages, order updates etc.",
+    price: 1999,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao4',
+    name: "Basic WhatsApp Chatbot (5 Q&A)",
+    description: "Automated chatbot to handle FAQs or bookings on WhatsApp",
+    price: 3499,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao5',
+    name: "Google Business Profile Setup",
+    description: "Claim + Optimize your Google Map listing",
+    price: 999,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao6',
+    name: "1 Custom Poster Design",
+    description: "Professionally designed social media graphic",
+    price: 249,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao7',
+    name: "Reel Video Edit (30-60 sec)",
+    description: "Instagram reel/video edit with captions & transitions",
+    price: 399,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao8',
+    name: "Basic Social Media Audit Report",
+    description: "Review of your Instagram / Facebook page with improvement tips",
+    price: 699,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao9',
+    name: "Premium Logo Design (3 Options)",
+    description: "3 logo concepts + 1 revision + source files",
+    price: 1799,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao10',
+    name: "SEO Audit Report (1 Website)",
+    description: "SEO health check + keyword suggestions",
+    price: 1299,
+    category: "Add-Ons"
+  },
+  {
+    id: 'ao11',
+    name: "Basic Google Ads Campaign Setup",
+    description: "₹3000 ad spend included. Campaign setup and management",
+    price: 3499,
+    category: "Add-Ons"
+  }
+];
 
   // Loading state for Razorpay
   if (!sdkReady) {
@@ -199,17 +409,14 @@ useEffect(() => {
   };
 
   const purchaseBundles = async () => {
-    // Validate Razorpay is loaded
-  
-
-    // Validate RAZORPAY_KEY_ID
+   
     if (!RAZORPAY_KEY_ID) {
       toast.error('Payment configuration error. Please contact support.');
       console.error('RAZORPAY_KEY_ID is not defined');
       return;
     }
 
-    // Validate cart and user
+  
     if (cart.length === 0) {
       toast.warning('Your cart is empty!');
       return;
@@ -225,11 +432,11 @@ useEffect(() => {
 
     try {
       // 1. Create purchase record on backend
-      const purchaseRes = await fetch('http://localhost:5000/api/purchases', {
+     const purchaseRes = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           items: cart.map(item => ({
@@ -244,13 +451,14 @@ useEffect(() => {
 
       if (!purchaseRes.ok) {
         throw new Error('Failed to create purchase record');
+       
       }
 
       const purchaseData = await purchaseRes.json();
       const purchaseId = purchaseData.purchase._id;
 
       // 2. Create Razorpay order
-      const orderResponse = await fetch('http://localhost:5000/api/payments/create-order', {
+            const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +495,7 @@ useEffect(() => {
         handler: async (response) => {
           try {
             // 4. Verify payment on backend
-            const verification = await fetch('http://localhost:5000/api/payments/verify', {
+           const verification = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -312,12 +520,12 @@ useEffect(() => {
               setCart([]); // Clear cart
               
               // Refresh purchased bundles
-              const updatedPurchases = await fetch('http://localhost:5000/api/purchases', {
+              const updatedPurchases = await fetch(`${import.meta.env.VITE_API_URL}/api/purchases`, {
                 headers: {
                   'Authorization': `Bearer ${token}`
                 }
               });
-              
+             
               if (updatedPurchases.ok) {
                 const data = await updatedPurchases.json();
                 setPurchasedBundles(data);
@@ -359,6 +567,7 @@ const rzp = new RZ(options);
 
     } catch (error) {
       console.error('Purchase error:', error);
+      
       toast.error(`Purchase failed: ${error.message}`);
     } finally {
       setIsPurchasing(false);
@@ -380,58 +589,91 @@ const rzp = new RZ(options);
         />
         
         {/* Header */}
-        <header className="bg-gray-900 border-b border-gray-800">
-          <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-            <button 
-              onClick={() => navigate('/')}
-              className="flex cursor-pointer items-center bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors"
-            >
-              <FiHome className="mr-2" />
-              Home
-            </button>
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 w-10 h-10 rounded-lg flex items-center justify-center">
-                <FiPackage className="text-white text-xl" />
+         {/* Header */}
+       <header className="bg-gray-900 border-b border-gray-800">
+          {/* Heading Section - Always at top */}
+          <div className="container mx-auto px-4 py-4">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">
+              Client Dashboard
+             
+            </h1>
+          </div>
+          
+          {/* Navigation Section */}
+          <div className="bg-gray-800/50 border-t border-gray-700/50">
+            <div className="container mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+              {/* Home Button */}
+              <button 
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 bg-gray-700/50 hover:bg-gray-700 px-4 py-2 rounded-lg transition-colors border border-gray-600 cursor-pointer"
+              >
+                <FiHome className="text-indigo-300" />
+                <span className="text-gray-200">Home</span>
+              </button>
+              
+              {/* Tab Buttons */}
+              <div className="flex flex-wrap items-center gap-3">
+                <button 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                    activeTab === 'bundles' 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400' 
+                      : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+                  }`}
+                  onClick={() => setActiveTab('bundles')}
+                >
+                  <FiPackage />
+                  <span>Service Bundles</span>
+                </button>
+                <button 
+  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+    activeTab === 'addons' 
+      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400' 
+      : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+  }`}
+  onClick={() => setActiveTab('addons')}
+>
+  <FiPlusCircle />
+  <span>Add-Ons</span>
+</button>
+                
+                <button 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                    activeTab === 'cart' 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400' 
+                      : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+                  }`}
+                  onClick={() => setActiveTab('cart')}
+                >
+                  <div className="relative">
+                    <FiShoppingCart />
+                    {cart.length > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {cart.length}
+                      </span>
+                    )}
+                  </div>
+                  <span>Cart</span>
+                </button>
+                
+                <button 
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                    activeTab === 'purchased' 
+                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400' 
+                      : 'bg-gray-700/60 text-gray-300 hover:bg-gray-700/80 border border-gray-600'
+                  }`}
+                  onClick={() => setActiveTab('purchased')}
+                >
+                  <div className="relative">
+                    <FiCheckCircle />
+                    {purchasedBundles.length > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {purchasedBundles.length}
+                      </span>
+                    )}
+                  </div>
+                  <span>My Bundles</span>
+                </button>
               </div>
-              <h1 className="text-2xl font-bold">Client Dashboard</h1>
-            </div>
-            
-            <div className="flex space-x-4">
-              <button 
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeTab === 'bundles' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-                onClick={() => setActiveTab('bundles')}
-              >
-                <FiPackage className="inline mr-2" />
-                Service Bundles
-              </button>
-              
-              <button 
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeTab === 'cart' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-                onClick={() => setActiveTab('cart')}
-              >
-                <FiShoppingCart className="inline mr-2" />
-                Cart ({cart.length})
-              </button>
-              
-              <button 
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  activeTab === 'purchased' 
-                    ? 'bg-indigo-600 text-white' 
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                }`}
-                onClick={() => setActiveTab('purchased')}
-              >
-                <FiCheckCircle className="inline mr-2" />
-                My Bundles ({purchasedBundles.length})
-              </button>
             </div>
           </div>
         </header>
@@ -506,7 +748,7 @@ const rzp = new RZ(options);
                   <h3 className="text-2xl font-bold text-gray-300 mb-2">Your cart is empty</h3>
                   <p className="text-gray-500 mb-6">Browse our service bundles to get started</p>
                   <button 
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold"
+                    className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold"
                     onClick={() => setActiveTab('bundles')}
                   >
                     Explore Bundles
@@ -539,7 +781,7 @@ const rzp = new RZ(options);
                         <p className="text-2xl font-bold">₹{calculateTotal()}</p>
                       </div>
                       <button 
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold flex items-center disabled:opacity-50"
+                        className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold flex items-center disabled:opacity-50"
                         onClick={purchaseBundles}
                         disabled={isPurchasing}
                       >
@@ -567,83 +809,171 @@ const rzp = new RZ(options);
           
           {/* Purchased Bundles Tab */}
           {activeTab === 'purchased' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-3xl font-bold mb-8 text-indigo-400">My Purchased Bundles</h2>
-              
-              {purchasedBundles.length === 0 ? (
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-12 text-center border border-gray-700">
-                  <FiPackage className="mx-auto text-5xl text-gray-500 mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-300 mb-2">No bundles purchased yet</h3>
-                  <p className="text-gray-500 mb-6">Get started with our digital service bundles</p>
-                  <button 
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold"
-                    onClick={() => setActiveTab('bundles')}
-                  >
-                    Explore Bundles
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {purchasedBundles.map((purchase) => (
-                    <div 
-                      key={purchase._id} 
-                      className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700 shadow-xl"
-                    >
-                      <div className="flex justify-between items-start mb-6">
-                        <div>
-                          <h3 className="text-2xl font-bold text-white">Purchased Items</h3>
-                          <div className="mt-2">
-                            {purchase.items.map((item, idx) => (
-                              <div key={idx} className="mb-2">
-                                <p className="text-indigo-400 font-medium">{item.name}</p>
-                                <p className="text-gray-500 text-sm">₹{item.price} • {item.category}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className={`p-2 rounded-lg ${
-                          purchase.status === 'completed' ? 'bg-green-500/10' :
-                          purchase.status === 'cancelled' ? 'bg-red-500/10' :
-                          'bg-yellow-500/10'
-                        }`}>
-                          {purchase.status === 'completed' && <FiCheckCircle className="text-green-500 text-2xl" />}
-                          {purchase.status === 'cancelled' && <FiXCircle className="text-red-500 text-2xl" />}
-                          {purchase.status === 'pending' && <FiClock className="text-yellow-500 text-2xl" />}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-4">
-                        <div>
-                          <p className="text-gray-400 text-sm">Total</p>
-                          <p className="text-xl font-bold">₹{purchase.total}</p>
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-xs ${
-                          purchase.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                          purchase.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
-                          'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {purchase.status?.toUpperCase() || 'PENDING'}
-                        </span>
-                        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors">
-                          Request Support
-                        </button>
-                      </div>
-                      
-                      <div className="mt-4 text-gray-500 text-sm">
-                        Purchased on: {new Date(purchase.date).toLocaleDateString()}
-                      </div>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    <h2 className="text-3xl font-bold mb-8 text-indigo-400">My Purchased Bundles</h2>
+
+    {purchasedBundles.length === 0 ? (
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-12 text-center border border-gray-700">
+        <FiPackage className="mx-auto text-5xl text-gray-500 mb-4" />
+        <h3 className="text-2xl font-bold text-gray-300 mb-2">No bundles purchased yet</h3>
+        <p className="text-gray-500 mb-6">Get started with our digital service bundles</p>
+        <button 
+          className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold"
+          onClick={() => setActiveTab('bundles')}
+        >
+          Explore Bundles
+        </button>
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {purchasedBundles.map((purchase) => (
+          <div 
+            key={purchase._id} 
+            className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-8 border border-gray-700 shadow-xl"
+          >
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-2xl font-bold text-white">Purchased Items</h3>
+                <div className="mt-2">
+                  {purchase.items.map((item, idx) => (
+                    <div key={idx} className="mb-2">
+                      <p className="text-indigo-400 font-medium">{item.name}</p>
+                      <p className="text-gray-500 text-sm">₹{item.price} • {item.category}</p>
                     </div>
                   ))}
                 </div>
-              )}
-            </motion.div>
-          )}
+              </div>
+              <div className={`p-2 rounded-lg ${
+                purchase.status === 'completed' ? 'bg-green-500/10' :
+                purchase.status === 'cancelled' ? 'bg-red-500/10' :
+                'bg-yellow-500/10'
+              }`}>
+                {purchase.status === 'completed' && <FiCheckCircle className="text-green-500 text-2xl" />}
+                {purchase.status === 'cancelled' && <FiXCircle className="text-red-500 text-2xl" />}
+                {purchase.status === 'pending' && <FiClock className="text-yellow-500 text-2xl" />}
+              </div>
+            </div>
+
+            {/* ✅ Service Progress Section */}
+            <div className="mt-6">
+              <h4 className="text-lg font-bold text-gray-300 mb-2">Service Progress</h4>
+              <div className="space-y-2">
+                {purchase.services.map((service, sIdx) => (
+                  <div key={sIdx} className="flex justify-between items-center">
+                    <p className="text-sm text-gray-400">{service.name} ({service.bundleType})</p>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      service.status === 'done' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {service.status.toUpperCase()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mt-3 bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div 
+                  className="bg-indigo-500 h-full transition-all duration-500"
+                  style={{ width: `${Math.round((purchase.services.filter(s => s.status === 'done').length / purchase.services.length) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-4">
+              <div>
+                <p className="text-gray-400 text-sm">Total</p>
+                <p className="text-xl font-bold">₹{purchase.total}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs ${
+                purchase.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                purchase.status === 'cancelled' ? 'bg-red-500/20 text-red-400' :
+                'bg-yellow-500/20 text-yellow-400'
+              }`}>
+                {purchase.status?.toUpperCase() || 'PENDING'}
+              </span>
+             <button 
+  className= "cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+  onClick={() => {
+    setSelectedPurchaseId(purchase._id);
+    setSupportModalOpen(true);
+  }}
+>
+  Request Support
+</button>
+            </div>
+
+            <div className="mt-4 text-gray-500 text-sm">
+              Purchased on: {new Date(purchase.date).toLocaleDateString()}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </motion.div>
+)}
+{activeTab === 'addons' && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    <h2 className="text-3xl font-bold mb-8 text-indigo-400">Add-On Services</h2>
+    <p className="text-gray-400 mb-8 max-w-3xl">
+      Enhance your existing bundles or get quick fixes with these à la carte services. 
+      Perfect when you need just one specific service.
+    </p>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {addOns.map((addon) => (
+        <div 
+          key={addon.id}
+          className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg flex flex-col"
+        >
+          <h3 className="text-xl font-bold text-white mb-2">{addon.name}</h3>
+          <p className="text-gray-400 mb-4 flex-grow">{addon.description}</p>
+          
+          <div className="flex items-center justify-between mt-auto">
+            <span className="text-2xl font-bold text-indigo-400">₹{addon.price}</span>
+            <button 
+              className="cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity"
+              onClick={() => addToCart(addon)}
+            >
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="mt-12 bg-gray-800/50 border border-gray-700 rounded-xl p-8 text-center">
+      <h3 className="text-2xl font-bold text-white mb-3">Need multiple add-ons?</h3>
+      <p className="text-gray-400 mb-6 max-w-2xl mx-auto">
+        Bundle 3 or more add-ons and get 10% discount on your total order.
+      </p>
+      <button 
+        className="cursor-pointer bg-gradient-to-r from-green-600 to-emerald-500 text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity"
+        onClick={() => {
+          setActiveTab('bundles');
+          toast.info('Browse our bundles for complete solutions');
+        }}
+      >
+        Explore Full Bundles
+      </button>
+    </div>
+  </motion.div>
+)}
+          
         </main>
       </div>
+      <SupportRequestModal 
+  isOpen={supportModalOpen} 
+  onClose={() => setSupportModalOpen(false)}
+  purchaseId={selectedPurchaseId}
+/>
     </Layout>
   );
 };
