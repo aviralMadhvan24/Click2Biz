@@ -5,26 +5,26 @@ import { fadeIn, staggerContainer } from '../utils/motion';
 const Services = () => {
   const services = [
     {
-      title: "Website Development",
-      description: "Professional, mobile-friendly websites that convert visitors into customers.",
+      title: "Digital Essentials",
+      description: "Starter packages for businesses needing basic online presence with websites, GMB setup, and social media.",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       )
     },
     {
-      title: "Social Media Management",
-      description: "Engaging content and strategy to grow your online presence.",
+      title: "Growth & Performance",
+      description: "Advanced solutions with premium websites, SEO, WhatsApp API, and ad campaigns for scaling businesses.",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
       )
     },
     {
-      title: "Website Retainers",
-      description: "Ongoing maintenance and updates to keep your site fresh.",
+      title: "Ongoing Maintenance",
+      description: "Monthly support packages for content updates, performance tracking, and continuous optimization.",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -46,7 +46,7 @@ const Services = () => {
           className="text-3xl md:text-4xl font-bold text-center mb-16 text-white"
           variants={fadeIn('up', 'tween', 0.2, 1)}
         >
-          Our <span className="text-indigo-400">Core Services</span>
+          Our <span className="text-indigo-400">Service Categories</span>
         </motion.h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -65,7 +65,7 @@ const Services = () => {
                 className="text-indigo-400 font-semibold hover:text-indigo-300 transition-colors flex items-center"
                 whileHover={{ x: 5 }}
               >
-                View Bundles
+                View Packages
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>

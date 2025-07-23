@@ -12,11 +12,11 @@ const AuthModal = ({ onClose, onLogin }) => {
   const [role,setRole] = useState("client");
   const [error, setError] = useState('');
  const navigate = useNavigate();
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-   
+    
     const endpoint = isLogin 
       ? 'http://localhost:5000/api/auth/login' 
       : 'http://localhost:5000/api/auth/register';
@@ -24,23 +24,34 @@ const AuthModal = ({ onClose, onLogin }) => {
     try {
       const payload = isLogin 
         ? { email, password }
-        : { name, email, password ,role };
+        : { name, email, password, role };
       
       const res = await axios.post(endpoint, payload);
       
       // Store token and user data
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('name', res.data.name);
-      localStorage.setItem('email', res.data.email);
-      localStorage.setItem('role', res.data.role);
+      
+      // Store the entire user object including _id
+      localStorage.setItem('user', JSON.stringify({
+        _id: res.data.user._id, // Make sure backend returns _id
+        name: res.data.user.name,
+        email: res.data.user.email,
+        role: res.data.user.role
+      }));
       
       // Notify parent component about successful login
-      onLogin({ name: res.data.name, email: res.data.email,role : res.data.role });
-   if (res.data.role === 'admin') {
-  navigate('/admin-dashboard');
-} else {
-  navigate('/client-dashboard');
-}
+      onLogin({ 
+        _id: res.data.user._id,
+        name: res.data.user.name, 
+        email: res.data.user.email,
+        role: res.data.user.role 
+      });
+      
+      if (res.data.user.role === 'admin') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/client-dashboard');
+      }
       
     } catch (err) {
       setError(err.response?.data?.message || 

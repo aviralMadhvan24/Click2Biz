@@ -1,4 +1,4 @@
-import mainConnection from "../db/mainConnection.js";
+
 import mongoose from "mongoose";
 const contactSchema = new mongoose.Schema({
   name: String,
@@ -9,4 +9,4 @@ const contactSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 }, { collection: "ContactInfo" });
 
-export default mainConnection.model("Contact", contactSchema);
+export default mongoose.model("Contact", contactSchema);

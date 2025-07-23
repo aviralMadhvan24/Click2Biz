@@ -60,7 +60,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                   scrolled ? 'text-gray-50 hover:bg-gray-100 hover:text-[#FF6B00]' : 'text-white hover:bg-white/10'
                 }`}
               >
@@ -72,8 +72,8 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
               <div className="flex items-center space-x-4">
                 {role === 'client' && (
                   <button
-                    onClick={() => navigate('/dashboard')}
-                    className="px-3 py-2 bg-[#312E81] hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors"
+                    onClick={() => navigate('/client-dashboard')}
+                    className="px-3 py-2 cursor-pointer bg-[#312E81] hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors"
                   >
                     Dashboard
                   </button>
@@ -90,7 +90,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 {/* User dropdown */}
                 <div className="relative" ref={userDropdownRef}>
                   <button
-                    className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   >
                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-[#312E81]">
@@ -118,17 +118,23 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 <button
                   onClick={onLoginClick}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    scrolled ? 'text-[#312E81] hover:bg-indigo-50' : 'text-white hover:bg-white/10'
+                    scrolled ? 'text-[#312E81] hover:bg-indigo-50' : 'text-white cursor-pointer hover:bg-white/10'
                   }`}
                 >
                   Login
                 </button>
                 <button
                   onClick={onLoginClick}
-                  className="px-3 py-2 bg-[#312E81] hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors"
+                  className="px-3 py-2 bg-[#312E81] hover:bg-indigo-700 text-white cursor-pointer text-sm font-medium rounded-md transition-colors"
                 >
                   Sign Up
                 </button>
+                 <button
+    onClick={() => navigate('/admin-invite-register')}
+    className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-md transition-colors"
+  >
+    Admin Register
+  </button>
               </div>
             )}
           </div>
@@ -168,7 +174,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 <>
                   {role === 'client' && (
                     <button
-                      onClick={() => { navigate('/dashboard'); setIsMenuOpen(false); }}
+                      onClick={() => { navigate('/client-dashboard'); setIsMenuOpen(false); }}
                       className="w-full px-4 py-2 bg-[#312E81] text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors"
                     >
                       My Dashboard

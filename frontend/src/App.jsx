@@ -1,8 +1,11 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import Navbar from './components/Navbar';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import PublicLayout from './components/PublicLayout';
+import AuthModal from './components/AuthModal';
+import InviteRegister from './components/pages/InviteRegister';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Bundles from './components/Bundles';
@@ -11,108 +14,135 @@ import Testimonials from './components/Testimonials';
 import WhyChooseUs from './components/WhyChooseUs';
 import Contact from './components/Contact';
 import AboutUs from './components/AboutUs';
-import Footer from './components/Footer';
-import WhatsAppButton from './components/WhatsAppButton';
-import AuthModal from './components/AuthModal';
-
-import AdminDashboard from './components/Admin-dashboard';
-
+import ErrorBoundary from './components/ErrorBoundary';
+import ClientDashboard from './components/pages/ClientDasboard.jsx';
+import AdminDashboard from './components/pages/AdminDashboard.jsx';
+import AdminInvites from './components/pages/AdminInvites';
 
 function PrivateRoute({ children, requiredRole }) {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const { user, isAuthenticated, isLoading } = useAuth();
 
-  if (!token) {
+  if (isLoading) {
+    return <div>Loading...</div>; // Or your loading component
+  }
+
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-  if (requiredRole && role !== requiredRole) {
+
+  if (requiredRole && user?.role !== requiredRole) {
     return <Navigate to="/" replace />;
   }
+
   return children;
 }
 
-function App() {
+function AppContent() {
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const name = localStorage.getItem('name');
-    const email = localStorage.getItem('email');
-    const storedRole = localStorage.getItem('role');
-    if (token) {
-      setIsLoggedIn(true);
-      setUser({ name, email });
-      setRole(storedRole);
-    }
-  }, []);
+  const { user, isAuthenticated, logout, login } = useAuth();
 
   const handleLogin = (userData) => {
-    setIsLoggedIn(true);
-    setUser(userData);
-    setRole(userData.role);
+    // Assuming userData contains both user info and token
+    // You may need to adjust this based on your API response structure
+    login(userData, userData.token);
     setShowLoginModal(false);
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    setIsLoggedIn(false);
-    setUser(null);
-    setRole(null);
+    logout();
   };
 
   return (
-    <BrowserRouter>
-      <Navbar 
-        isLoggedIn={isLoggedIn}
-        user={user}
-        role={role}
-        onLoginClick={() => setShowLoginModal(true)}
-        onLogout={handleLogout}
-      />
-
+    <>
       {showLoginModal && (
-        <AuthModal 
+        <AuthModal
           onClose={() => setShowLoginModal(false)}
           onLogin={handleLogin}
         />
       )}
 
       <Routes>
-        {/* Public Home */}
-        <Route path="/" element={
-          <div className="font-sans">
-            <Hero />
-            <Services />
-            <Bundles title="Digital" />
-            <hr />
-            <Bundles title="Social Media" />
-            <Portfolio />
-            <Testimonials />
-            <WhyChooseUs />
-            <Contact />
-            <AboutUs />
-            <Footer />
-            <WhatsAppButton />
-          </div>
-        } />
+        {/** Public pages with Navbar/Footer **/}
+        <Route
+          element={
+            <PublicLayout
+              isLoggedIn={isAuthenticated}
+              user={user}
+              role={user?.role}
+              onLoginClick={() => setShowLoginModal(true)}
+              onLogout={handleLogout}
+            />
+          }
+        >
+          <Route
+            path="/"
+            element={
+              <div className="font-sans">
+                <Hero />
+                <Services />
+                <Bundles title="Digital" />
+                <hr />
+                <Bundles title="Social Media" />
+                <hr />
+                <Bundles title="Maintenance" />
+                <Portfolio />
+                <Testimonials />
+                <WhyChooseUs />
+                <Contact />
+                <AboutUs />
+              </div>
+            }
+          />
+        </Route>
 
-        {/* Client Dashboard */}
-       
+        {/** Client dashboard, only for clients **/}
+        <Route
+          path="/client-dashboard"
+          element={
+            <PrivateRoute requiredRole="client">
+              <ErrorBoundary>
+      <ClientDashboard />
+    </ErrorBoundary>
+            </PrivateRoute>
+          }
+        />
 
-        {/* Admin Dashboard */}
-        <Route path="/admin-dashboard" element={
-          <PrivateRoute requiredRole="admin">
-            <AdminDashboard />
-          </PrivateRoute>
-        } />
+        {/** Admin area **/}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoute requiredRole="admin">
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/invites"
+          element={
+            <PrivateRoute requiredRole="admin">
+              <AdminInvites />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin-invite-register"
+          element={<InviteRegister />}
+        />
 
-        {/* Fallback */}
+        {/** Fallback **/}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </>
+  );
+}
+
+function App() {
+  return (
+    
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+   
   );
 }
 

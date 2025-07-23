@@ -1,10 +1,10 @@
-// src/components/Contact.jsx
+
 import React, { useState } from 'react';
 import axios from 'axios';
 
 import { motion } from 'framer-motion';
 import { fadeIn ,staggerContainer } from '../utils/motion';
-import { FiFacebook, FiTwitter, FiInstagram, FiLinkedin, FiArrowUp } from 'react-icons/fi';
+
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -75,9 +75,9 @@ const Contact = () => {
               
               <div className="space-y-4">
                 {[
-                  { icon: 'phone', text: '+91 98765 43210' },
-                  { icon: 'mail', text: 'hello@click2biz.com' },
-                  { icon: 'map', text: 'Mumbai, India' }
+                  { icon: 'phone', text: '+91 7452877151' },
+                  { icon: 'mail', text: 'aviralmadhvan@gmail.com' },
+                  { icon: 'map', text: 'Ghaziabad, India' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-start">
                     <div className="bg-indigo-800/30 p-3 rounded-lg mr-4">
@@ -104,44 +104,44 @@ const Contact = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
+                    className="w-full px-4 py-3  border border-white  rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white"
                     required
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
+                    <label htmlFor="email" className="block text-white mb-2">Email</label>
                     <input
                       type="email"
                       id="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 text-white  border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="phone" className="block text-gray-700 mb-2">Phone</label>
+                    <label htmlFor="phone" className="block text-white  mb-2">Phone</label>
                     <input
                       type="tel"
                       id="phone"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-4 py-3 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
                   </div>
                 </div>
                 <div className="mb-6">
-                  <label htmlFor="businessType" className="block text-gray-700 mb-2">Business Type</label>
+                  <label htmlFor="businessType" className="block text-white mb-2">Business Type</label>
                   <select
                     id="businessType"
                     name="businessType"
                     value={formData.businessType}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   >
                     <option value="">Select your business</option>
@@ -153,14 +153,14 @@ const Contact = () => {
                   </select>
                 </div>
                 <div className="mb-6">
-                  <label htmlFor="message" className="block text-gray-700 mb-2">Your Requirements</label>
+                  <label htmlFor="message" className="block text-white mb-2">Your Requirements</label>
                   <textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     rows="4"
-                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-4 py-3 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   ></textarea>
                 </div>

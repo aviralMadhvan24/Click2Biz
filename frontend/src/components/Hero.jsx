@@ -76,7 +76,7 @@ const Hero = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => scrollToSection('contact')}
-            className="px-8 py-4 rounded-full font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all"
+            className="px-8 py-4 cursor-pointer rounded-full font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all"
           >
             Get Your Digital Solution
           </motion.button>
@@ -84,7 +84,7 @@ const Hero = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => scrollToSection('bundles')}
-            className="px-8 py-4 rounded-full font-bold bg-transparent border-2 border-indigo-500 text-white hover:bg-indigo-900/30 transition-colors"
+            className="px-8 py-4 cursor-pointer rounded-full font-bold bg-transparent border-2 border-indigo-500 text-white hover:bg-indigo-900/30 transition-colors"
           >
             Explore Pricing Plans
           </motion.button>
@@ -94,7 +94,7 @@ const Hero = () => {
           className="mt-16 flex justify-center"
           variants={fadeIn('up', 'tween', 0.6, 1)}
         >
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 max-w-md border border-gray-700">
+          {/* <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 max-w-md border border-gray-700">
             <div className="flex flex-wrap justify-center gap-4">
               {[
                 { label: "Websites", value: "200+" },
@@ -108,7 +108,7 @@ const Hero = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </motion.div>
       </motion.div>
     </section>

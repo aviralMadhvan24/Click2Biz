@@ -1,26 +1,110 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../utils/motion';
+
 const Bundles = ({title}) => {
-  const packages = [
+  const digitalEssentials = [
     {
-      name: "Basic Launch",
-      price: "₹4,999",
-      features: ["1-page responsive website", "WhatsApp business button", "Basic contact form", "1-month free support"]
+      id: 'de1',
+      name: "Digital Kickstart",
+      price: "₹3,000",
+      features: [
+        "1-page Landing/Mini-site",
+        "Google My Business Setup & Optimization",
+        "WhatsApp Chat Widget",
+        "Basic On-page SEO",
+        "2 Social Media Posts"
+      ],
+      popular: false
     },
     {
-      name: "Standard Pro",
-      price: "₹6,999",
-      features: ["3-5 page website", "Basic SEO optimization", "Image gallery", "Mobile-responsive design", "3-month support"]
-    },
-    {
-      name: "Premium Presence",
-      price: "₹9,999",
-      features: ["5-8 page custom website", "Advanced animations", "Blog setup", "SEO optimization", "Social media integration", "6-month priority support"]
+      id: 'de2',
+      name: "Business Builder",
+      price: "₹4,500",
+      features: [
+        "3-page Website",
+        "GMB + Reviews Management",
+        "WhatsApp Catalog",
+        "Payment Link Integration",
+        "3 Social Media Posts + 1 Reel",
+        "Google Analytics Setup"
+      ],
+      popular: true
     }
   ];
 
-   return (
+  const growthPerformance = [
+    {
+      id: 'gp1',
+      name: "Growth Catalyst",
+      price: "₹7,000",
+      features: [
+        "4-page Premium Site + Blog",
+        "Full SEO & Google Search Console Setup",
+        "WhatsApp API Integration",
+        "6 Social Posts + 1 Reel",
+        "Basic Ad-Campaign Setup (up to ₹3,500 ad spend)"
+      ],
+      popular: false
+    },
+    {
+      id: 'gp2',
+      name: "Enterprise Elevate",
+      price: "₹8,500",
+      features: [
+        "5–6-page Custom Site with Booking/E-Commerce",
+        "Advanced SEO & Analytics Report",
+        "WhatsApp API + Chatbot Flow",
+        "8 Social Posts + 2 Reels",
+        "Ad-Campaign Management (₹3,500 ad spend included)"
+      ],
+      popular: true
+    }
+  ];
+
+  const maintenanceBundles = [
+    {
+      id: 'm1',
+      name: "Essential Maintenance",
+      price: "₹1,200/month",
+      features: [
+        "2 hrs support",
+        "2 Posts",
+        "1 GMB update",
+        "Monthly performance report"
+      ],
+      popular: false
+    },
+    {
+      id: 'm2',
+      name: "Premium Maintenance",
+      price: "₹2,200/month",
+      features: [
+        "4 hrs support",
+        "4 Posts + 1 Reel",
+        "1 GMB update",
+        "Analytics report + recommendations"
+      ],
+      popular: true
+    }
+  ];
+
+  const getBundlesByTitle = () => {
+    switch(title) {
+      case 'Digital':
+        return digitalEssentials;
+      case 'Social Media':
+        return growthPerformance;
+      case 'Maintenance':
+        return maintenanceBundles;
+      default:
+        return [...digitalEssentials, ...growthPerformance, ...maintenanceBundles];
+    }
+  };
+
+  const packages = getBundlesByTitle();
+
+  return (
     <section id="bundles" className="py-20 bg-gradient-to-b from-gray-900 to-gray-950">
       <motion.div 
         className="container mx-auto px-6"
@@ -33,20 +117,20 @@ const Bundles = ({title}) => {
           className="text-3xl md:text-4xl font-bold text-center mb-16 text-white"
           variants={fadeIn('up', 'tween', 0.2, 1)}
         >
-          Affordable <span className="text-indigo-400">{title}</span> Bundles
+          {title === 'Maintenance' ? 'Ongoing Maintenance Plans' : `Affordable ${title} Bundles`}
         </motion.h2>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className={`grid ${packages.length > 2 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-8 max-w-5xl mx-auto`}>
           {packages.map((pkg, index) => (
             <motion.div 
-              key={index} 
+              key={pkg.id} 
               className={`border border-gray-800 bg-gradient-to-b from-gray-900 to-gray-950 rounded-xl p-8 shadow-2xl transform transition-all duration-300 hover:-translate-y-2 ${
-                index === 1 ? "ring-2 ring-indigo-500 relative z-10" : ""
+                pkg.popular ? "ring-2 ring-indigo-500 relative z-10" : ""
               }`}
               variants={fadeIn('up', 'tween', 0.3 + index * 0.1, 1)}
               whileHover={{ scale: 1.03 }}
             >
-              {index === 1 && (
+              {pkg.popular && (
                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1 rounded-full">
                   Most Popular
                 </div>
@@ -72,7 +156,7 @@ const Bundles = ({title}) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Book Now
+                {title === 'Maintenance' ? 'Subscribe Now' : 'Book Now'}
               </motion.button>
             </motion.div>
           ))}

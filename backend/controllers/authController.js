@@ -4,10 +4,10 @@ import jwt from 'jsonwebtoken';
 
 
 export const register = async (req, res) => {
-  const { name, email, password ,role} = req.body;
+  const { name, email, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword , role : role  || 'client' });
+    const newUser = await User.create({ name, email, password: hashedPassword , role :  'client' });
 
 
     const token = jwt.sign(
@@ -19,12 +19,16 @@ export const register = async (req, res) => {
 
 
 
-     return res.status(201).json({
+      res.status(201).json({
       message: 'User Registered',
-      token,          
+      token, 
+      newUser: {  
+         id: newUser._id,       
       name: newUser.name, 
       email: newUser.email,
-      role : newUser.role
+      role : newUser.role,
+     
+    }
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -42,7 +46,10 @@ export const login = async (req, res) => {
 
     // Include role in token payload ✅
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {   id: user._id, 
+          role: user.role,
+          name: user.name,   
+          email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -50,9 +57,12 @@ export const login = async (req, res) => {
     res.json({
       message: 'Logged in successfully',
       token,
-      name: user.name,
-      email: user.email,
-      role: user.role
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
 
   } catch (err) {
