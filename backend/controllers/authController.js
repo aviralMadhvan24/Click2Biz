@@ -3,75 +3,87 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import otpGenerator from 'otp-generator';
-// controllers/authController.js
 import admin from 'firebase-admin';
 
 
-// Initialize Firebase Admin if not already done
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-    })
-  });
-}
+// Proper Firebase Admin initialization with error handling
+let firebaseInitialized = false;
+
+const initializeFirebase = () => {
+  try {
+    if (!admin.apps.length) {
+      const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+      };
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
+      });
+      firebaseInitialized = true;
+      console.log('Firebase Admin initialized successfully');
+    }
+  } catch (error) {
+    console.error('Firebase Admin initialization error:', error);
+    throw new Error('Failed to initialize Firebase Admin');
+  }
+};
+
+// Initialize immediately when module loads
+initializeFirebase();
+
+
 
 export const firebaseAuth = async (req, res) => {
   const { idToken } = req.body;
 
+  if (!idToken) {
+    return res.status(400).json({ message: "ID token is required" });
+  }
+
   try {
-    // Verify Firebase ID token
+    // 🔐 1. Verify token with Firebase Admin SDK
     const decodedToken = await admin.auth().verifyIdToken(idToken);
+
     const { email, name } = decodedToken;
 
-    // Check if user exists
+    // 👤 2. Check if user exists in DB
     let user = await User.findOne({ email });
 
+    // 🆕 3. If not, create the user
     if (!user) {
-      // Create new user if doesn't exist
       user = new User({
-        name: name || 'Google User',
+        name: name || email.split("@")[0],
         email,
-        role: 'client', // default role
-        isVerified: true,
-        authMethod: 'google' // track auth method
+        role: "client", // default role
+        provider: "google",
       });
+
       await user.save();
     }
 
-    // Generate JWT token (same as your regular auth)
+    // 🔑 4. Generate JWT for session
     const token = jwt.sign(
-      { 
-        id: user._id,
-        role: user.role,
-        name: user.name,
-        email: user.email 
-      },
+      { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: "7d" }
     );
 
-    res.json({
-      message: 'Authentication successful',
+    // 📦 5. Send response
+    res.status(200).json({
+      message: "Login successful",
+      user,
       token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
     });
 
-  } catch (err) {
-    console.error('Firebase auth error:', err);
-    res.status(401).json({ 
-      message: 'Authentication failed',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+  } catch (error) {
+    console.error("Firebase Auth Error:", error);
+    res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
 // Configure email transporter with better error handling
 const createTransporter = () => {
   try {

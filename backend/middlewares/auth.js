@@ -43,38 +43,51 @@ export const isClient = (req, res, next) => {
 
 
 
+
+
+
 export const protect = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  let token;
+  
+  // 1. Get token from headers or cookies
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
 
   if (!token) {
-    return res.status(401).json({ message: 'Not authorized' });
+    return res.status(401).json({ 
+      message: 'You are not logged in! Please log in to get access.' 
+    });
   }
 
   try {
+    // 2. Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded user:", decoded);
-
-    // 🔴 THIS IS THE MISSING PART
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    
+    // 3. Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return res.status(401).json({
+        message: 'The user belonging to this token no longer exists.'
+      });
     }
 
+    // 4. Check if user changed password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return res.status(401).json({
+        message: 'User recently changed password! Please log in again.'
+      });
+    }
 
-    req.user = user; 
-    
-    console.log("Authenticated user:", req.user._id);
-
-    req.user = {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    };
-
+    // 5. Grant access to protected route
+    req.user = currentUser;
     next();
-  } catch (error) {
-    console.error('Token verification error:', error);
-    res.status(401).json({ message: 'Not authorized, token failed' });
+  } catch (err) {
+    console.error('JWT verification error:', err);
+    return res.status(401).json({ 
+      message: 'Invalid token. Please log in again.' 
+    });
   }
 };

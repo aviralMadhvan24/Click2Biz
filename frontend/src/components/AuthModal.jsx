@@ -8,7 +8,7 @@ import {signInWithPopup, getAuth} from 'firebase/auth';
 import {GoogleAuthProvider} from 'firebase/auth';
 import { auth, googleProvider } from '../firebase'; // Adjust the import path as needed
 import { getRedirectResult, signInWithRedirect } from 'firebase/auth';
-
+import { toast } from 'react-toastify';
 // Add this useEffect to handle the redirect result
 
 const AuthModal = ({ onClose, onLogin }) => {
@@ -27,14 +27,12 @@ const AuthModal = ({ onClose, onLogin }) => {
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
- useEffect(() => {
+useEffect(() => {
   const handleRedirect = async () => {
     try {
       const result = await getRedirectResult(auth);
       if (result) {
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.idToken;
-        // Continue with your token handling...
+        await handleAuthSuccess(result);
       }
     } catch (error) {
       console.error('Redirect error:', error);
@@ -42,49 +40,76 @@ const AuthModal = ({ onClose, onLogin }) => {
   };
   handleRedirect();
 }, []);
-  const handleAuthSuccess = async (result) => {
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const idToken = credential.idToken;
 
-    if (!idToken) {
-      throw new Error('No ID token received from Google');
+const handleGoogleLogin = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+
+    // ✅ Get Firebase ID Token — this is the correct token to send
+  const idToken = await result.user.getIdToken();
+  const response = await fetch("http://localhost:5000/api/auth/firebase-auth", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  body: JSON.stringify({ idToken }),
+});
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      localStorage.setItem("click2biz-user", JSON.stringify(responseData.user));
+      localStorage.setItem("click2biz-token", idToken);
+      toast.success(responseData.message);
+      navigate("/dashboard");
+    } else {
+      toast.error(responseData.message);
     }
+  } catch (error) {
+    console.error("Login error:", error);
+    toast.error("Something went wrong while signing in");
+  }
+};
 
-    // Send token to your backend
-    const response = await axios.post(`${API}/api/auth/firebase-auth`, { idToken });
+
+const handleAuthSuccess = async (result) => {
+  try {
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (!credential) {
+      throw new Error('No credential received from Google');
+    }
     
-    // Handle response
+  const response = await axios.post(`${API}/api/auth/firebase-auth`, {
+  idToken: credential.idToken
+});
+
+    
     localStorage.setItem('token', response.data.token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     onLogin(response.data.user);
-    navigate(response.data.user.role === 'admin' ? '/admin-dashboard' : '/client-dashboard');
-  };
- const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      // First try popup auth
-      const result = await signInWithPopup(auth, googleProvider)
-        .catch(async (popupError) => {
-          if (popupError.code === 'auth/popup-blocked' || 
-              popupError.code === 'auth/popup-closed-by-user') {
-            // Fallback to redirect if popup fails
-            await signInWithRedirect(auth, googleProvider);
-            return null;
-          }
-          throw popupError;
-        });
-
-      if (result) {
-        await handleAuthSuccess(result);
-      }
-    } catch (error) {
-      console.error('Google auth error:', error);
-      setError(error.response?.data?.message || 'Google authentication failed. Please try again.');
-      setIsLoading(false);
+    
+    // Redirect based on role
+    const redirectPath = response.data.user.role === 'admin' 
+      ? '/admin-dashboard' 
+      : '/client-dashboard';
+    navigate(redirectPath);
+    
+  } catch (error) {
+    console.error('Auth success error:', error);
+    let errorMessage = 'Authentication failed';
+    
+    if (error.response) {
+      errorMessage = error.response.data.message || errorMessage;
+    } else if (error.request) {
+      errorMessage = 'No response from server';
     }
-  };
+    
+    setError(errorMessage);
+    throw error;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

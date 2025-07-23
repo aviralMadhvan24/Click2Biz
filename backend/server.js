@@ -23,7 +23,7 @@ app.use(cors({
   'https://click2-biz-frontend.vercel.app/',
   'https://click2biz.in',
   'https://www.click2biz.in',
-  
+  "http://localhost:5000",
   'http://localhost:5173'
 ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
