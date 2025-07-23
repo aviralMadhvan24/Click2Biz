@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {FcGoogle} from 'react-icons/fc';
+import {signInWithPopup, getAuth} from 'firebase/auth';
+import {GoogleAuthProvider} from 'firebase/auth';
+import { auth, googleProvider } from '../firebase'; // Adjust the import path as needed
+import { getRedirectResult, signInWithRedirect } from 'firebase/auth';
+
+// Add this useEffect to handle the redirect result
 
 const AuthModal = ({ onClose, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,6 +27,64 @@ const AuthModal = ({ onClose, onLogin }) => {
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
+ useEffect(() => {
+  const handleRedirect = async () => {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.idToken;
+        // Continue with your token handling...
+      }
+    } catch (error) {
+      console.error('Redirect error:', error);
+    }
+  };
+  handleRedirect();
+}, []);
+  const handleAuthSuccess = async (result) => {
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const idToken = credential.idToken;
+
+    if (!idToken) {
+      throw new Error('No ID token received from Google');
+    }
+
+    // Send token to your backend
+    const response = await axios.post(`${API}/api/auth/firebase-auth`, { idToken });
+    
+    // Handle response
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+    onLogin(response.data.user);
+    navigate(response.data.user.role === 'admin' ? '/admin-dashboard' : '/client-dashboard');
+  };
+ const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // First try popup auth
+      const result = await signInWithPopup(auth, googleProvider)
+        .catch(async (popupError) => {
+          if (popupError.code === 'auth/popup-blocked' || 
+              popupError.code === 'auth/popup-closed-by-user') {
+            // Fallback to redirect if popup fails
+            await signInWithRedirect(auth, googleProvider);
+            return null;
+          }
+          throw popupError;
+        });
+
+      if (result) {
+        await handleAuthSuccess(result);
+      }
+    } catch (error) {
+      console.error('Google auth error:', error);
+      setError(error.response?.data?.message || 'Google authentication failed. Please try again.');
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -323,7 +388,29 @@ const AuthModal = ({ onClose, onLogin }) => {
               )}
             </button>
           </form>
+   {!forgotStep && (
+            <>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gray-900 text-gray-400">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
 
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="cursor-pointer w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors bg-gray-800 hover:bg-gray-700 text-white"
+              >
+                <FcGoogle size={20} />
+                <span>Sign in with Google</span>
+              </button>
+            </>
+          )}
         
           {!forgotStep && (
             <div className="mt-6 text-center text-sm text-gray-400">

@@ -3,7 +3,75 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import otpGenerator from 'otp-generator';
+// controllers/authController.js
+import admin from 'firebase-admin';
 
+
+// Initialize Firebase Admin if not already done
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    })
+  });
+}
+
+export const firebaseAuth = async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    // Verify Firebase ID token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { email, name } = decodedToken;
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = new User({
+        name: name || 'Google User',
+        email,
+        role: 'client', // default role
+        isVerified: true,
+        authMethod: 'google' // track auth method
+      });
+      await user.save();
+    }
+
+    // Generate JWT token (same as your regular auth)
+    const token = jwt.sign(
+      { 
+        id: user._id,
+        role: user.role,
+        name: user.name,
+        email: user.email 
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    res.json({
+      message: 'Authentication successful',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+
+  } catch (err) {
+    console.error('Firebase auth error:', err);
+    res.status(401).json({ 
+      message: 'Authentication failed',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
 // Configure email transporter with better error handling
 const createTransporter = () => {
   try {

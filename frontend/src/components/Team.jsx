@@ -30,7 +30,7 @@ const Team = () => {
     },
     {
       name: 'Nishant Tripathi',
-      role: 'Social Media & Community Manager',
+      role: 'Marketing Lead',
       image: '/team/nishant.png',
       linkedin: 'https://www.linkedin.com/in/nishant-tripathi-206560250/',
       phone: '+91-9369215072'

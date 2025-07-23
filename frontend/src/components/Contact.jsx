@@ -76,7 +76,8 @@ const Contact = () => {
               <div className="space-y-4">
                 {[
                   { icon: 'phone', text: '+91 7452877151' },
-                  { icon: 'mail', text: 'aviralmadhvan@gmail.com' },
+                  { icon: 'mail', text: 'click2biz308@gmail.com,   contact@click2biz.com' },
+                  
                   { icon: 'map', text: 'Ghaziabad, India' }
                 ].map((item, i) => (
                   <div key={i} className="flex items-start">
