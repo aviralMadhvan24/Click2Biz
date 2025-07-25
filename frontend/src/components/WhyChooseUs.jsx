@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { fadeIn, staggerContainer } from '../utils/motion';
-import { FiDollarSign, FiClock, FiUsers, FiHelpCircle, FiMessageSquare } from 'react-icons/fi';
+import { FiDollarSign, FiClock, FiUsers, FiHelpCircle, FiMessageSquare, FiTrendingUp, FiShield } from 'react-icons/fi';
+
 const WhyChooseUs = () => {
   const features = [
     {
@@ -11,18 +12,18 @@ const WhyChooseUs = () => {
     },
     {
       icon: <FiClock className="h-8 w-8" />,
-      title: "7-Day Delivery",
-      description: "Get your digital presence up and running in just one week"
+      title: "Quick Delivery",
+      description: "Get your digital presence up and running in 10-25 days"
     },
     {
       icon: <FiUsers className="h-8 w-8" />,
-      title: "Student-Powered",
-      description: "Young talent supervised by industry experts"
+      title: "Expert Team",
+      description: "Dedicated professionals handling your digital growth"
     },
     {
-      icon: <FiHelpCircle className="h-8 w-8" />,
-      title: "Free GMB Setup",
-      description: "Google My Business profile setup with every website"
+      icon: <FiTrendingUp className="h-8 w-8" />,
+      title: "Proven Results",
+      description: "Track record of helping businesses grow online"
     },
     {
       icon: <FiMessageSquare className="h-8 w-8" />,
@@ -31,7 +32,7 @@ const WhyChooseUs = () => {
     }
   ];
 
- return (
+  return (
     <section id="why-us" className="py-20 bg-gray-900">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">
@@ -52,7 +53,6 @@ const WhyChooseUs = () => {
       </div>
     </section>
   );
-  
 };
 
 export default WhyChooseUs;

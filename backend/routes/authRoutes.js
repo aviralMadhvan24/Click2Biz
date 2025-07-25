@@ -4,7 +4,6 @@ import { protect, isAdmin } from '../middlewares/auth.js';
 import { register, login, logout, verifyPassword } from '../controllers/authController.js';
 import { inviteRegister, generateInvite } from '../controllers/inviteController.js';
 import { forgotPassword, resetPassword } from '../controllers/authController.js';
-import { firebaseAuth } from '../controllers/authController.js';
 
 // Add to your existing routes
 
@@ -23,5 +22,5 @@ router.post('/generate-invite', protect, isAdmin, generateInvite);
 
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
-router.post('/firebase-auth', firebaseAuth);
+
 export default router;

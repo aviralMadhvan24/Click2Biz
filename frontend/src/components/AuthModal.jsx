@@ -1,15 +1,8 @@
-import React, { useState ,useEffect} from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiUser, FiLock, FiMail, FiEye, FiEyeOff, FiArrowLeft } from 'react-icons/fi';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import {FcGoogle} from 'react-icons/fc';
-import {signInWithPopup, getAuth} from 'firebase/auth';
-import {GoogleAuthProvider} from 'firebase/auth';
-import { auth, googleProvider } from '../firebase'; // Adjust the import path as needed
-import { getRedirectResult, signInWithRedirect } from 'firebase/auth';
-import { toast } from 'react-toastify';
-// Add this useEffect to handle the redirect result
 
 const AuthModal = ({ onClose, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -27,89 +20,6 @@ const AuthModal = ({ onClose, onLogin }) => {
 
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL;
-useEffect(() => {
-  const handleRedirect = async () => {
-    try {
-      const result = await getRedirectResult(auth);
-      if (result) {
-        await handleAuthSuccess(result);
-      }
-    } catch (error) {
-      console.error('Redirect error:', error);
-    }
-  };
-  handleRedirect();
-}, []);
-
-const handleGoogleLogin = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-
-    // ✅ Get Firebase ID Token — this is the correct token to send
-  const idToken = await result.user.getIdToken();
-  const response = await fetch("http://localhost:5000/api/auth/firebase-auth", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  body: JSON.stringify({ idToken }),
-});
-
-    const responseData = await response.json();
-
-    if (response.ok) {
-      localStorage.setItem("click2biz-user", JSON.stringify(responseData.user));
-      localStorage.setItem("click2biz-token", idToken);
-      toast.success(responseData.message);
-      navigate("/dashboard");
-    } else {
-      toast.error(responseData.message);
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    toast.error("Something went wrong while signing in");
-  }
-};
-
-
-const handleAuthSuccess = async (result) => {
-  try {
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    if (!credential) {
-      throw new Error('No credential received from Google');
-    }
-    
-  const response = await axios.post(`${API}/api/auth/firebase-auth`, {
-  idToken: credential.idToken
-});
-
-    
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    onLogin(response.data.user);
-    
-    // Redirect based on role
-    const redirectPath = response.data.user.role === 'admin' 
-      ? '/admin-dashboard' 
-      : '/client-dashboard';
-    navigate(redirectPath);
-    
-  } catch (error) {
-    console.error('Auth success error:', error);
-    let errorMessage = 'Authentication failed';
-    
-    if (error.response) {
-      errorMessage = error.response.data.message || errorMessage;
-    } else if (error.request) {
-      errorMessage = 'No response from server';
-    }
-    
-    setError(errorMessage);
-    throw error;
-  } finally {
-    setIsLoading(false);
-  }
-};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -413,29 +323,7 @@ const handleAuthSuccess = async (result) => {
               )}
             </button>
           </form>
-   {!forgotStep && (
-            <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-700"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-gray-900 text-gray-400">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="cursor-pointer w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium transition-colors bg-gray-800 hover:bg-gray-700 text-white"
-              >
-                <FcGoogle size={20} />
-                <span>Sign in with Google</span>
-              </button>
-            </>
-          )}
         
           {!forgotStep && (
             <div className="mt-6 text-center text-sm text-gray-400">

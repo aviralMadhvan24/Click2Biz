@@ -84,10 +84,8 @@ function AppContent() {
                 <Services />
                 <Bundles title="Digital" />
                 <hr />
-                <Bundles title="Social Media" />
-                <hr />
-                <Bundles title="Maintenance" />
-                <AddOns/>
+               
+             
                 <Portfolio />
                 <Testimonials />
                 <WhyChooseUs />
