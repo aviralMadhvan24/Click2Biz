@@ -251,7 +251,7 @@ const PackagesDetails = () => (
               {pkg.bonus && (
                 <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/20">
                   <h4 className="text-md font-bold text-white mb-2 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-400" />
+                    <Star className="w-5 h-5 text-yellow-500" />
                     Exclusive Bonuses
                   </h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
