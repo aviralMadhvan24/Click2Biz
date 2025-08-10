@@ -28,10 +28,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      // Close mobile menu first
       setIsMenuOpen(false);
-      
-      // Wait a brief moment for menu to close before scrolling
       setTimeout(() => {
         element.scrollIntoView({
           behavior: 'smooth',
@@ -60,25 +57,27 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
             <motion.img
               src="../../logo.png"
               alt="Click2Biz Logo"
-              className="w-10 h-10 rounded-lg object-contain"
+              className="w-10 h-10 lg:w-10 lg:h-10 md:w-8 md:h-8 rounded-lg object-contain"
               whileHover={{ rotate: 10 }}
             />
-            <span className="text-xl font-bold text-white">Click2Biz</span>
+            <span className="text-xl lg:text-xl md:text-lg font-bold text-white">Click2Biz</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                  scrolled ? 'text-gray-50 hover:bg-gray-100 hover:text-[#FF6B00]' : 'text-white hover:bg-white/10'
-                }`}
-              >
-                {link.name}
-              </button>
-            ))}
+          <div className="hidden lg:flex items-center">
+            <div className="flex overflow-x-auto scrollbar-hide space-x-1 lg:space-x-2 mr-2">
+              {navLinks.map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollToSection(link.id)}
+                  className={`whitespace-nowrap px-2 py-1 lg:px-3 lg:py-2 rounded-md text-xs lg:text-sm font-medium transition-colors cursor-pointer ${
+                    scrolled ? 'text-gray-50 hover:bg-gray-100 hover:text-[#FF6B00]' : 'text-white hover:bg-white/10'
+                  }`}
+                >
+                  {link.name}
+                </button>
+              ))}
+            </div>
 
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
@@ -153,7 +152,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md text-white hover:bg-indigo-900/30 transition-colors"
+            className="lg:hidden p-2 rounded-md text-white hover:bg-indigo-900/30 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
@@ -165,7 +164,7 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
-            className="md:hidden bg-gray-900 shadow-lg absolute top-full left-0 right-0 overflow-hidden"
+            className="lg:hidden bg-gray-900 shadow-lg absolute top-full left-0 right-0 overflow-hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -182,47 +181,46 @@ const Navbar = ({ isLoggedIn, user, role, onLoginClick, onLogout }) => {
                 </button>
               ))}
               <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-              {isLoggedIn ? (
-  <>
-    {/* User Info Section - Fixed for visibility */}
-    <div className="flex items-center px-4 py-3 mb-2 border-b border-gray-700 bg-gray-800 rounded-lg">
-      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-[#312E81] font-bold text-lg mr-3">
-        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-      </div>
-      <div>
-        <p className="text-white font-medium text-base">{user?.name || 'User'}</p>
-        <p className="text-indigo-300 text-xs mt-1">
-          {role === 'admin' ? 'Administrator' : 'Client Account'}
-        </p>
-      </div>
-    </div>
+                {isLoggedIn ? (
+                  <>
+                    {/* User Info Section - Fixed for visibility */}
+                    <div className="flex items-center px-4 py-3 mb-2 border-b border-gray-700 bg-gray-800 rounded-lg">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-[#312E81] font-bold text-lg mr-3">
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div>
+                        <p className="text-white font-medium text-base">{user?.name || 'User'}</p>
+                        <p className="text-indigo-300 text-xs mt-1">
+                          {role === 'admin' ? 'Administrator' : 'Client Account'}
+                        </p>
+                      </div>
+                    </div>
 
-    {role === 'client' && (
-      <button
-        onClick={() => { navigate('/client-dashboard'); setIsMenuOpen(false); }}
-        className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors mb-2 flex items-center justify-center"
-      >
-        <FiUser className="mr-2" /> My Dashboard
-      </button>
-    )}
-    {role === 'admin' && (
-      <button
-        onClick={() => { navigate('/admin-dashboard'); setIsMenuOpen(false); }}
-        className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors mb-2 flex items-center justify-center"
-      >
-        <FiUser className="mr-2" /> Admin Panel
-      </button>
-    )}
-    <button
-      onClick={() => { onLogout(); setIsMenuOpen(false); }}
-      className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
-    >
-      <FiLogOut className="mr-2" /> Sign Out
-    </button>
-  </>
-) : (
-
-      <div className="grid grid-cols-2 gap-2">
+                    {role === 'client' && (
+                      <button
+                        onClick={() => { navigate('/client-dashboard'); setIsMenuOpen(false); }}
+                        className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors mb-2 flex items-center justify-center"
+                      >
+                        <FiUser className="mr-2" /> My Dashboard
+                      </button>
+                    )}
+                    {role === 'admin' && (
+                      <button
+                        onClick={() => { navigate('/admin-dashboard'); setIsMenuOpen(false); }}
+                        className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors mb-2 flex items-center justify-center"
+                      >
+                        <FiUser className="mr-2" /> Admin Panel
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { onLogout(); setIsMenuOpen(false); }}
+                      className="w-full px-4 py-3 flex items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+                    >
+                      <FiLogOut className="mr-2" /> Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => { onLoginClick(); setIsMenuOpen(false); }}
                       className="px-4 py-2 text-[#312E81] text-sm font-medium border border-[#312E81] rounded-md hover:bg-indigo-50 transition-colors"

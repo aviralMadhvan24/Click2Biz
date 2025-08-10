@@ -75,7 +75,7 @@ const AboutUs = () => {
                 whileHover={{ scale: 1.02 }}
               >
                 <p className="text-indigo-200 font-semibold text-sm sm:text-base">
-                  Package pricing starts from ₹2,999 only.
+                  Package pricing starts from ₹1,999 only.
                 </p>
               </motion.div>
             </motion.div>

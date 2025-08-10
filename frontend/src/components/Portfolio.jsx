@@ -4,9 +4,9 @@ import { fadeIn, staggerContainer } from '../utils/motion';
 
 const Portfolio = () => {
   const projects = [
-    { type: "Website", title: "Local Restaurant", category: "website", link: "https://preview--vibrant-curry-corner.lovable.app/", image: "/projects/restaurant.png" },
+    { type: "Website", title: "Tax and Financial Services", category: "website", link: "https://www.niyatigroup.co.in", image: "/projects/niyatigroup.png" },
     { type: "Website", title: "Gym", category: "website", link: "https://pulseegym.netlify.app/", image: "/projects/gym.png" },
-    { type: "Website", title: "Sweets Shop", category: "website", link: "https://31336281-1504017.renderforestsites.com/", image: "/projects/sweetshop.png" },
+    { type: "Website", title: "Salon", category: "website", link: "https://skylarksalon.netlify.app/", image: "/projects/salon.png" },
     { type: "Social Media", title: "Cafe Promotion", category: "social", image: "/projects/coffee.jpg" },
     { type: "Social Media", title: "Gym", category: "social", image: "/projects/gym-sample.jpg" },
   ];
