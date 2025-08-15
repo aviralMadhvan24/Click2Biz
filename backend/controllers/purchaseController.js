@@ -3,17 +3,33 @@ import Purchase from "../models/Purchase.model.js";
 export const createPurchase = async (req, res) => {
   try {
     const { id: clientId, name: clientName, email: clientEmail } = req.user;
-    const { items, total } = req.body;
+    let { items, total } = req.body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "Items are required" });
     }
 
+    // Sanitize prices in items
+    items = items.map(item => ({
+      ...item,
+      price: typeof item.price === "string"
+        ? Number(item.price.replace(/,/g, ""))
+        : item.price
+    }));
+
+  if (typeof total === "string") {
+  total = total.replace(/[^\d.-]/g, "");
+  total = Number(total);
+}
+if (isNaN(total) || total <= 0) {
+  return res.status(400).json({ error: "Valid total amount is required" });
+}
+
     if (!total || total <= 0) {
       return res.status(400).json({ error: "Valid total amount is required" });
     }
 
-    // create services array dynamically
+    // Create services array dynamically
     const services = items.map(item => ({
       name: `${item.name} Service`,
       bundleType: item.category,
@@ -35,10 +51,11 @@ export const createPurchase = async (req, res) => {
       purchase: newPurchase
     });
   } catch (err) {
-    console.error('Purchase creation error:', err);
+    console.error("Purchase creation error:", err);
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 export const getPurchases = async (req, res) => {

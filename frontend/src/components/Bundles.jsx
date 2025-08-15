@@ -56,6 +56,7 @@ const Bundles = ({ title }) => {
       price: "₹14,999",
       originalPrice: "19,999",
       monthly: "₹7,999",
+
       savings: "Save ₹5,000",
       features: [
         "Digital Foundation System",
@@ -85,6 +86,7 @@ const Bundles = ({ title }) => {
     {
       id: 'b3',
       name: "Foundation Bundle",
+
       price: "₹2,999",
       originalPrice: "₹5,999",
       monthly: "₹2,499",

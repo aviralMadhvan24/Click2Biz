@@ -179,15 +179,8 @@ const PackagesDetails = () => (
           <span className="text-indigo-400 font-medium"> Start with 15-day free trial, pay only when you see results.</span>
         </p>
 
-        {/* Trust Badges */}
-        <div className="flex flex-wrap justify-center gap-6 mt-8">
-          {trustBadges.map((badge, index) => (
-            <div key={index} className="flex items-center gap-2 text-gray-400 text-sm">
-              <div className="text-indigo-400">{badge.icon}</div>
-              {badge.text}
-            </div>
-          ))}
-        </div>
+    
+       
       </div>
 
       {/* Packages Grid */}
@@ -251,7 +244,7 @@ const PackagesDetails = () => (
               {pkg.bonus && (
                 <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-400/20">
                   <h4 className="text-md font-bold text-white mb-2 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500" />
+                    <Star className="w-5 h-5 text-yellow-400" />
                     Exclusive Bonuses
                   </h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
