@@ -21,7 +21,6 @@
 </p>
 
 ---
-
 ## 📑 Table of Contents
 
 - [Overview](#overview)
@@ -38,7 +37,6 @@
 - [Contributing](#contributing)
 - [License](#license)
 
----
 
 ## 📌 Overview
 
