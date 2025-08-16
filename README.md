@@ -35,25 +35,25 @@ Click2Biz/
    ```bash
    git clone https://github.com/aviralMadhvan24/Click2Biz.git
 
-Backend
+2. Backend
 ```bash
 cd backend
 npm install
 ```
 
-Frontend
+3. Frontend
 ```bash
 cd ../frontend
 npm install
 ```
 
-Start the backend:
+4. Start the backend:
 ```bash
 cd backend
 npm start
 ```
 
-Start the frontend (in a new terminal):
+5. Start the frontend (in a new terminal):
 ```bash
 cd frontend
 npm start
