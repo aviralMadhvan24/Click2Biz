@@ -36,28 +36,28 @@ Click2Biz/
    git clone https://github.com/aviralMadhvan24/Click2Biz.git
 
 2. Backend
-```bash
-cd backend
-npm install
-```
+   ```bash
+   cd backend
+   npm install
+   ```
 
 3. Frontend
-```bash
-cd ../frontend
-npm install
-```
+   ```bash
+   cd ../frontend
+   npm install
+   ```
 
 4. Start the backend:
-```bash
-cd backend
-npm start
-```
+   ```bash
+   cd backend
+   npm start
+   ```
 
 5. Start the frontend (in a new terminal):
-```bash
-cd frontend
-npm start
-```
+   ```bash
+   cd frontend
+   npm start
+   ```
 
 🚀 Usage
 Open the frontend at http://localhost:3000
